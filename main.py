@@ -5,10 +5,9 @@ import os
 import re
 from typing import Optional, List, Dict
 from price_scraper import ArtaleMarketScraper
-from dotenv import load_dotenv
-
-# 載入環境變數
-load_dotenv()
+# Railway會自動提供環境變數，不需要載入.env文件
+# from dotenv import load_dotenv
+# load_dotenv()
 
 # 機器人設定
 intents = discord.Intents.default()
@@ -164,35 +163,15 @@ async def help_command(ctx):
     await ctx.send(embed=embed)
 
 if __name__ == "__main__":
-    # 打印所有環境變數（用於調試）
-    print("=== 環境變數調試 ===")
-    print(f"所有環境變數數量: {len(os.environ)}")
+    # 直接從Railway環境變數讀取
+    token = os.getenv('DISCORD_BOT_TOKEN')
     
-    # 查找所有包含DISCORD的環境變數
-    discord_vars = {k: v for k, v in os.environ.items() if 'DISCORD' in k.upper()}
-    print(f"包含DISCORD的環境變數: {list(discord_vars.keys())}")
-    
-    # 查找所有包含TOKEN的環境變數
-    token_vars = {k: v for k, v in os.environ.items() if 'TOKEN' in k.upper()}
-    print(f"包含TOKEN的環境變數: {list(token_vars.keys())}")
-    
-    # 嘗試不同的環境變數名稱
-    possible_names = ['DISCORD_BOT_TOKEN', 'DISCORD_TOKEN', 'BOT_TOKEN', 'TOKEN']
-    token = None
-    
-    for name in possible_names:
-        test_token = os.getenv(name)
-        if test_token:
-            print(f"找到環境變數: {name} = {test_token[:10]}...")
-            token = test_token
-            break
-    
-    # 調試信息
-    print(f"最終TOKEN存在: {token is not None}")
+    # 簡單的調試信息
+    print(f"Railway環境變數檢查:")
+    print(f"DISCORD_BOT_TOKEN存在: {token is not None}")
     if token:
-        print(f"TOKEN長度: {len(token)}")
-        print(f"TOKEN前10字符: {token[:10]}...")
-    print("==================")
+        print(f"Token長度: {len(token)}")
+        print(f"Token開頭: {token[:10]}...")
     
     if not token:
         print("請設置 DISCORD_BOT_TOKEN 環境變量")
