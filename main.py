@@ -164,14 +164,35 @@ async def help_command(ctx):
     await ctx.send(embed=embed)
 
 if __name__ == "__main__":
-    # 從環境變量讀取機器人Token
-    token = os.getenv('DISCORD_BOT_TOKEN')
+    # 打印所有環境變數（用於調試）
+    print("=== 環境變數調試 ===")
+    print(f"所有環境變數數量: {len(os.environ)}")
+    
+    # 查找所有包含DISCORD的環境變數
+    discord_vars = {k: v for k, v in os.environ.items() if 'DISCORD' in k.upper()}
+    print(f"包含DISCORD的環境變數: {list(discord_vars.keys())}")
+    
+    # 查找所有包含TOKEN的環境變數
+    token_vars = {k: v for k, v in os.environ.items() if 'TOKEN' in k.upper()}
+    print(f"包含TOKEN的環境變數: {list(token_vars.keys())}")
+    
+    # 嘗試不同的環境變數名稱
+    possible_names = ['DISCORD_BOT_TOKEN', 'DISCORD_TOKEN', 'BOT_TOKEN', 'TOKEN']
+    token = None
+    
+    for name in possible_names:
+        test_token = os.getenv(name)
+        if test_token:
+            print(f"找到環境變數: {name} = {test_token[:10]}...")
+            token = test_token
+            break
     
     # 調試信息
-    print(f"環境變數檢查: TOKEN存在={token is not None}")
+    print(f"最終TOKEN存在: {token is not None}")
     if token:
         print(f"TOKEN長度: {len(token)}")
         print(f"TOKEN前10字符: {token[:10]}...")
+    print("==================")
     
     if not token:
         print("請設置 DISCORD_BOT_TOKEN 環境變量")
