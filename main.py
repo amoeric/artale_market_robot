@@ -167,6 +167,12 @@ if __name__ == "__main__":
     # 從環境變量讀取機器人Token
     token = os.getenv('DISCORD_BOT_TOKEN')
     
+    # 調試信息
+    print(f"環境變數檢查: TOKEN存在={token is not None}")
+    if token:
+        print(f"TOKEN長度: {len(token)}")
+        print(f"TOKEN前10字符: {token[:10]}...")
+    
     if not token:
         print("請設置 DISCORD_BOT_TOKEN 環境變量")
         print("你可以創建一個 .env 檔案並添加：")
