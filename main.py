@@ -163,15 +163,29 @@ async def help_command(ctx):
     await ctx.send(embed=embed)
 
 if __name__ == "__main__":
-    # 直接從Railway環境變數讀取
-    token = os.getenv('DISCORD_BOT_TOKEN')
+    # 嘗試多種環境變數名稱
+    possible_names = [
+        'DISCORD_BOT_TOKEN',
+        'DISCORD_TOKEN', 
+        'BOT_TOKEN',
+        'TOKEN'
+    ]
     
-    # 簡單的調試信息
-    print(f"Railway環境變數檢查:")
-    print(f"DISCORD_BOT_TOKEN存在: {token is not None}")
-    if token:
-        print(f"Token長度: {len(token)}")
-        print(f"Token開頭: {token[:10]}...")
+    token = None
+    found_var = None
+    
+    print("Railway環境變數檢查:")
+    for name in possible_names:
+        test_token = os.getenv(name)
+        if test_token:
+            token = test_token
+            found_var = name
+            print(f"✅ 找到環境變數: {name}")
+            print(f"Token長度: {len(token)}")
+            print(f"Token開頭: {token[:10]}...")
+            break
+        else:
+            print(f"❌ {name}: 未找到")
     
     if not token:
         print("請設置 DISCORD_BOT_TOKEN 環境變量")
