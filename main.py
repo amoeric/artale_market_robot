@@ -3,6 +3,7 @@ from discord.ext import commands
 import asyncio
 import os
 import re
+import threading
 from typing import Optional, List, Dict
 from price_scraper import ArtaleMarketScraper
 # 載入.env文件（本地開發用）
@@ -166,7 +167,8 @@ async def help_command(ctx):
     
     await ctx.send(embed=embed)
 
-if __name__ == "__main__":
+def run_bot():
+    """啟動Discord bot"""
     # 嘗試多種環境變數名稱
     possible_names = [
         'DISCORD_BOT_TOKEN',
@@ -178,7 +180,7 @@ if __name__ == "__main__":
     token = None
     found_var = None
     
-    print("Railway環境變數檢查:")
+    print("環境變數檢查:")
     for name in possible_names:
         test_token = os.getenv(name)
         if test_token:
@@ -195,11 +197,62 @@ if __name__ == "__main__":
         print("請設置 DISCORD_BOT_TOKEN 環境變量")
         print("你可以創建一個 .env 檔案並添加：")
         print("DISCORD_BOT_TOKEN=your_bot_token_here")
-        exit(1)
+        return
     
     try:
         bot.run(token)
     except discord.LoginFailure:
         print("機器人Token無效，請檢查DISCORD_BOT_TOKEN環境變量")
     except Exception as e:
-        print(f"啟動機器人時發生錯誤: {e}") 
+        print(f"啟動機器人時發生錯誤: {e}")
+
+def start_http_server():
+    """啟動簡單的HTTP服務器供Render使用"""
+    try:
+        from http.server import HTTPServer, BaseHTTPRequestHandler
+        import json
+        
+        class HealthHandler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                if self.path == '/':
+                    self.send_response(200)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    response = {
+                        "status": "running",
+                        "service": "Artale Market Discord Bot",
+                        "bot_user": str(bot.user) if bot.user else "Connecting..."
+                    }
+                    self.wfile.write(json.dumps(response).encode())
+                elif self.path == '/health':
+                    self.send_response(200)
+                    self.send_header('Content-type', 'text/plain')
+                    self.end_headers()
+                    self.wfile.write(b'OK')
+                else:
+                    self.send_response(404)
+                    self.end_headers()
+            
+            def log_message(self, format, *args):
+                # 靜默HTTP日誌
+                pass
+        
+        port = int(os.environ.get('PORT', 10000))
+        server = HTTPServer(('0.0.0.0', port), HealthHandler)
+        print(f"🌐 HTTP服務器啟動在端口 {port}")
+        server.serve_forever()
+    except Exception as e:
+        print(f"❌ HTTP服務器錯誤: {e}")
+
+if __name__ == "__main__":
+    # 檢查是否在Render環境中
+    if os.getenv('RENDER'):
+        print("🚀 檢測到Render環境，啟動HTTP服務器...")
+        # 在背景執行Discord bot
+        bot_thread = threading.Thread(target=run_bot, daemon=True)
+        bot_thread.start()
+        # 主線程運行HTTP服務器
+        start_http_server()
+    else:
+        # 本地開發環境，直接運行bot
+        run_bot() 
