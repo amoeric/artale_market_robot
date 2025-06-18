@@ -5,9 +5,13 @@ import os
 import re
 from typing import Optional, List, Dict
 from price_scraper import ArtaleMarketScraper
-# Railway會自動提供環境變數，不需要載入.env文件
-# from dotenv import load_dotenv
-# load_dotenv()
+# 載入.env文件（本地開發用）
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    print("✅ .env文件已載入")
+except ImportError:
+    print("⚠️ python-dotenv未安裝，跳過.env文件載入")
 
 # 機器人設定
 intents = discord.Intents.default()

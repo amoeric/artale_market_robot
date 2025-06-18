@@ -1,0 +1,14 @@
+services:
+  - type: worker
+    name: artale-market-bot
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: DISCORD_BOT_TOKEN
+        sync: false  # 需要手動設定
+      - key: PYTHON_VERSION
+        value: 3.11.0
+    autoDeploy: true
+    repo: https://github.com/amoeric/artale_market_robot.git
+    branch: main 
